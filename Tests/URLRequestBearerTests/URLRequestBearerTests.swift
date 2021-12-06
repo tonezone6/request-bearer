@@ -1,6 +1,6 @@
 
 import Combine
-import RequestBearer
+import URLRequestBearer
 import XCTest
 
 class RequestBearerTests: XCTestCase {

@@ -4,13 +4,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "RequestBearer",
+    name: "URLRequestBearer",
     platforms: [.macOS(.v11), .iOS(.v13)],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
-            name: "RequestBearer",
-            targets: ["RequestBearer"]),
+            name: "URLRequestBearer",
+            targets: ["URLRequestBearer"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -20,10 +20,10 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
-            name: "RequestBearer",
+            name: "URLRequestBearer",
             dependencies: []),
         .testTarget(
-            name: "RequestBearerTests",
-            dependencies: ["RequestBearer"]),
+            name: "URLRequestBearerTests",
+            dependencies: ["URLRequestBearer"]),
     ]
 )

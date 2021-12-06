@@ -1,6 +1,6 @@
 
 import Foundation
-import RequestBearer
+import URLRequestBearer
 
 extension URLRequest.Bearer.Store {
     static var mock: Self {
