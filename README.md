@@ -1,7 +1,7 @@
 # RequestBearer
 
 A simple tool for mutating `URLRequest` with an authorization bearer if a JWT token is available.
-To use it just define a `store` and a `handler` then chain the `authorize(_ request:)` like this:
+To use it just define a `store` and a `handler` then authorize the request:
 
 ```swift
 Just(URLRequest.userDetails)
