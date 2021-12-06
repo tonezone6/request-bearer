@@ -2,36 +2,29 @@
 import Foundation
 import RequestBearer
 
-extension Store where Self == StoreMock {
+extension URLRequest.Bearer.Store {
     static var mock: Self {
-        .init()
-    }
-}
-
-class StoreMock: Store {
-    private var dict = [String : Data]()
-
-    var key: String {
-        "request.bearer.token"
-    }
-
-    var token: Token? {
-        guard let data = dict[key],
-              let token = try? JSONDecoder().decode(Token.self, from: data)
-        else { return nil }
-        return token
-    }
-
-    func save(token: Token?) {
-        if let value = token,
-           let data = try? JSONEncoder().encode(value) {
-            dict.updateValue(data, forKey: key)
-        } else {
-            dict.removeValue(forKey: key)
-        }
-    }
-
-    func delete() {
-        dict.removeValue(forKey: key)
+        var dict = [String : Data]()
+        let key = "jwt.token.mock"
+        let decoder = JSONDecoder()
+        
+        return .init(
+            token: {
+                guard let data = dict[key],
+                      let value = try? decoder.decode(URLRequest.Bearer.Token.self, from: data)
+                else { return nil }
+                return value
+            },
+            saveToken: { token in
+                if let data = try? JSONEncoder().encode(token) {
+                    dict.updateValue(data, forKey: key)
+                } else {
+                    dict.removeValue(forKey: key)
+                }
+            },
+            delete: {
+                dict.removeValue(forKey: key)
+            }
+        )
     }
 }

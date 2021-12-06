@@ -1,11 +1,11 @@
-# RequestBearer
+# URLRequest Bearer
 
-A simple tool for mutating `URLRequest` with an authorization bearer if a JWT token is available.
-To use it just define a `store` and a `handler` then authorize the request:
+A simple tool to add authorization bearer tokens to `URLRequest`s.
+Just define a `store` and a `handler` then authorize the request:
 
 ```swift
 Just(URLRequest.userDetails)
-    .flatMap { RequestBearer(store: .keychain, handler: .live).authorize($0) }
+    .flatMap(URLRequest.Bearer(store: .keychain, handler: .live).authorize)
     .flatMap(URLSession.shared.dataTaskPublisher)
     .map(\.data)
     .decode(type: User.self, decoder: JSONDecoder())
@@ -17,7 +17,7 @@ Just(URLRequest.userDetails)
 The handler has two closure requirements, `expired` and `refresh`.
 
 ```swift 
-extension RequestBearer.Handler {
+extension URLRequest.Bearer.Handler {
     static var live: Self {
         .init(
             expired: { token in 
@@ -25,7 +25,7 @@ extension RequestBearer.Handler {
                 // ...
             },
             refresh: { token in
-                // perform an api call to refresh the token
+                // refresh the token
                 // ...
             }
         )

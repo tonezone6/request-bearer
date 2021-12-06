@@ -7,8 +7,8 @@ class RequestBearerTests: XCTestCase {
     var cancellables = Set<AnyCancellable>()
     
     func testTokenValid() {
-        let store: Store = .mock
-        let requestBearer = RequestBearer(
+        let store: URLRequest.Bearer.Store = .mock
+        let bearer = URLRequest.Bearer(
             store: store,
             handler: .init(
                 expired: { _ in false },
@@ -21,29 +21,30 @@ class RequestBearerTests: XCTestCase {
         let request = PassthroughSubject<URLRequest, Never>()
         var headers: [String?] = []
         
-        request.setFailureType(to: URLError.self)
-            .flatMap(requestBearer.authorize)
+        request
+            .setFailureType(to: URLError.self)
+            .flatMap(bearer.authorize)
             .map { $0.value(forHTTPHeaderField: "Authorization") }
             .assertNoFailure()
             .sink { headers.append($0) }
             .store(in: &cancellables)
 
-        XCTAssertNil(store.token)
+        XCTAssertNil(store.token())
 
         request.send(.mock)
                 
         XCTAssertEqual(headers, [nil])
         
-        store.save(token: .init(value: "xyz", refresh: ""))
+        store.saveToken(.init(value: "xyz", refresh: ""))
         request.send(.mock)
         
         XCTAssertEqual(headers, [nil, "Bearer xyz"])
-        XCTAssertEqual(store.token?.value, "xyz")
+        XCTAssertEqual(store.token()?.value, "xyz")
     }
     
     func testTokenExpired() {
-        let store: Store = .mock
-        let requestBearer = RequestBearer(
+        let store: URLRequest.Bearer.Store = .mock
+        let bearer = URLRequest.Bearer(
             store: store,
             handler: .init(
                 expired: { _ in true },
@@ -58,26 +59,27 @@ class RequestBearerTests: XCTestCase {
         let request = PassthroughSubject<URLRequest, Never>()
         var headers: [String?] = []
         
-        request.setFailureType(to: URLError.self)
-            .flatMap(requestBearer.authorize)
+        request
+            .setFailureType(to: URLError.self)
+            .flatMap(bearer.authorize)
             .map { $0.value(forHTTPHeaderField: "Authorization") }
             .assertNoFailure()
             .sink { headers.append($0) }
             .store(in: &cancellables)
 
-        store.save(token: .init(value: "xyz", refresh: ""))
+        store.saveToken(.init(value: "xyz", refresh: ""))
 
-        XCTAssertEqual(store.token?.value, "xyz")
+        XCTAssertEqual(store.token()?.value, "xyz")
     
         request.send(.mock)
         
-        XCTAssertEqual(headers, ["Bearer new.xyz"])   // headers updated
-        XCTAssertEqual(store.token?.value, "new.xyz") // store updated
+        XCTAssertEqual(headers, ["Bearer new.xyz"])
+        XCTAssertEqual(store.token()?.value, "new.xyz") 
         
         store.delete()
         request.send(.mock)
         
         XCTAssertEqual(headers, ["Bearer new.xyz", nil])
-        XCTAssertNil(store.token)
+        XCTAssertNil(store.token())
     }
 }
