@@ -14,19 +14,56 @@ Just(URLRequest.userDetails)
     .assign(to: &$user)
 ```
 
+The store has 3 closure requirements, `token`, `saveToken` and `deleteToken`:
+
+```swift
+extension URLRequest.Bearer.Store {
+    static var keychain: Self {
+        let keychain = Keychain()
+        let key = "myapp.jwt.token"
+        
+        return .init(
+            token: {
+                guard let data = keychain.data(for: key),
+                      let value = try? JSONDecoder().decode(Token.self, from: data)
+                else { return nil }
+                return value
+            },
+            saveToken: { token in
+                if let token = token, let data = try? JSONEncoder().encode(token) {
+                    keychain.set(data, forKey: key)
+                } else {
+                    keychain.set(nil, forKey: key)
+                }
+            },
+            deleteToken: {
+                keychain.clear()
+            }
+        )
+    }
+}
+
+```
+
 The handler has two closure requirements, `expired` and `refresh`.
 
 ```swift 
 extension URLRequest.Bearer.Handler {
     static var live: Self {
         .init(
-            expired: { token in 
-                // check if token is expired
-                // ...
+            expired: { token in
+                decode(jwt: token.value).expired
             },
             refresh: { token in
-                // refresh the token
-                // ...
+                let request = URLRequest(
+                    endpoint: "endpoint/refresh",
+                    queryItems: [.init(name: "refresh_token", value: token.refresh)]
+                )
+                return URLSession.shared
+                    .dataTaskPublisher(for: request)
+                    .map(\.data)
+                    .decode(type: Token.self, decoder: JSONDecoder())
+                    .eraseToAnyPublisher()
             }
         )
     }    
