@@ -14,7 +14,7 @@ Just(URLRequest.userDetails)
     .assign(to: &$user)
 ```
 
-The handler has two closures requirements, `expired` and `refresh`.
+The handler has two closure requirements, `expired` and `refresh`.
 
 ```swift 
 extension RequestBearer.Handler {
@@ -28,7 +28,6 @@ extension RequestBearer.Handler {
                 // perform an api call to refresh the token
                 // ...
             }
-            
         )
     }    
 }
