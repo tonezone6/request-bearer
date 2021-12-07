@@ -13,6 +13,18 @@ Just(URLRequest.user)
     .assign(to: &$user)
 ```
 
+```swift
+struct Token: JWT, Codable {
+    let value: String
+    let refresh: String
+    
+    enum CodingKeys: String, CodingKey {
+        case value = "token"
+        case refresh = "refresh_token"
+    }
+}
+```
+
 `Bearer.Store` has 3 closure requirements: `token`, `saveToken` and `deleteToken`.
 
 ```swift
