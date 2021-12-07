@@ -7,13 +7,13 @@ class RequestBearerTests: XCTestCase {
     var cancellables = Set<AnyCancellable>()
     
     func testTokenValid() {
-        let store: URLRequest.Bearer.Store = .mock
+        let store = URLRequest.Bearer.Store.mock
         let bearer = URLRequest.Bearer(
             store: store,
             handler: .init(
                 expired: { _ in false },
                 refresh: { _ in
-                    fatalError("should not be called if token not expired")
+                    fatalError("should not be called if token is valid")
                 }
             )
         )
@@ -35,7 +35,7 @@ class RequestBearerTests: XCTestCase {
                 
         XCTAssertEqual(headers, [nil])
         
-        store.saveToken(.init(value: "xyz", refresh: ""))
+        store.save(Token(value: "xyz", refresh: ""))
         request.send(.mock)
         
         XCTAssertEqual(headers, [nil, "Bearer xyz"])
@@ -43,13 +43,13 @@ class RequestBearerTests: XCTestCase {
     }
     
     func testTokenExpired() {
-        let store: URLRequest.Bearer.Store = .mock
+        let store = URLRequest.Bearer.Store.mock
         let bearer = URLRequest.Bearer(
             store: store,
             handler: .init(
                 expired: { _ in true },
                 refresh: { _ in
-                    Just(.init(value: "new.xyz", refresh: ""))
+                    Just(Token(value: "new.xyz", refresh: ""))
                         .setFailureType(to: URLError.self)
                         .eraseToAnyPublisher()
                 }
@@ -67,7 +67,7 @@ class RequestBearerTests: XCTestCase {
             .sink { headers.append($0) }
             .store(in: &cancellables)
 
-        store.saveToken(.init(value: "xyz", refresh: ""))
+        store.save(Token(value: "xyz", refresh: ""))
 
         XCTAssertEqual(store.token()?.value, "xyz")
     

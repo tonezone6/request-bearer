@@ -25,7 +25,7 @@ extension URLRequest {
                 .flatMap { expired in
                     expired ?
                         handler.refresh(token)
-                            .handleEvents(receiveOutput: store.saveToken)
+                            .handleEvents(receiveOutput: store.save)
                             .eraseToAnyPublisher() :
                         Just(token)
                             .setFailureType(to: URLError.self)

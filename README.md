@@ -1,10 +1,9 @@
 # URLRequest Bearer
 
-A simple tool to add authorization bearer tokens to `URLRequest`s.
-Just define a `store` and a `handler` then authorize the request:
+A simple extension tool for adding authorization tokens to `URLRequests`.
 
 ```swift
-Just(URLRequest.userDetails)
+Just(URLRequest.user)
     .flatMap(URLRequest.Bearer(store: .keychain, handler: .live).authorize)
     .flatMap(URLSession.shared.dataTaskPublisher)
     .map(\.data)
@@ -14,30 +13,30 @@ Just(URLRequest.userDetails)
     .assign(to: &$user)
 ```
 
-The store has 3 closure requirements, `token`, `saveToken` and `deleteToken`:
+`Bearer.Store` has 3 closure requirements: `token`, `saveToken` and `deleteToken`.
 
 ```swift
 extension URLRequest.Bearer.Store {
     static var keychain: Self {
         let keychain = Keychain()
-        let key = "myapp.jwt.token"
+        let key = "app.jwt.token"
         return .init(
             token: { /* get token */ },
-            saveToken: { /* save token */ },
-            deleteToken: { /* clear keychain */ }
+            save: { /* save token */ },
+            delete: { /* clear keychain */ }
         )
     }
 }
 
 ```
 
-The handler has two closure requirements, `expired` and `refresh`.
+`Bearer.Handler` has two closure requirements: `expired` and `refresh`.
 
 ```swift 
 extension URLRequest.Bearer.Handler {
     static var live: Self {
         .init(
-            expired: { /* check if token expired */ },
+            expired: { /* check token if expired */ },
             refresh: { /* refresh token */ }
         )
     }    

@@ -4,12 +4,12 @@ import Foundation
 
 extension URLRequest.Bearer {
     public struct Handler {
-        public let expired: (Token) -> Bool
-        public let refresh: (Token) -> AnyPublisher<Token, URLError>
+        public let expired: (JWT) -> Bool
+        public let refresh: (JWT) -> AnyPublisher<JWT, URLError>
         
         public init(
-            expired: @escaping (Token) -> Bool,
-            refresh: @escaping (Token) -> AnyPublisher<Token, URLError>
+            expired: @escaping (JWT) -> Bool,
+            refresh: @escaping (JWT) -> AnyPublisher<JWT, URLError>
         ) {
             self.expired = expired
             self.refresh = refresh
